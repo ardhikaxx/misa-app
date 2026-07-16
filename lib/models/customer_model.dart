@@ -36,8 +36,8 @@ class CustomerModel {
       notes: data['notes'],
       totalTransactions: data['totalTransactions'] ?? 0,
       totalSpent: data['totalSpent'] ?? 0,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 

@@ -63,8 +63,8 @@ class BusinessModel {
           ? Map<String, String>.from(data['bankAccountInfo'])
           : null,
       qrisImageUrl: data['qrisImageUrl'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isSetupComplete: data['isSetupComplete'] ?? false,
     );
   }

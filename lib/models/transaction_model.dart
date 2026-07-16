@@ -77,10 +77,11 @@ class TransactionModel {
   factory TransactionModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final itemsData = data['items'] as List<dynamic>? ?? [];
+    final now = DateTime.now();
     return TransactionModel(
       transactionId: doc.id,
       invoiceNumber: data['invoiceNumber'] ?? '',
-      transactionDate: (data['transactionDate'] as Timestamp).toDate(),
+      transactionDate: (data['transactionDate'] as Timestamp?)?.toDate() ?? now,
       customerId: data['customerId'] ?? '',
       customerSnapshot: CustomerSnapshot.fromMap(data['customerSnapshot'] ?? {}),
       items: itemsData.map((e) => TransactionItemModel.fromMap(e)).toList(),
@@ -95,11 +96,9 @@ class TransactionModel {
       amountPaid: data['amountPaid'] ?? 0,
       jobStatus: data['jobStatus'] ?? 'waiting',
       notes: data['notes'],
-      invoiceGeneratedAt: data['invoiceGeneratedAt'] != null
-          ? (data['invoiceGeneratedAt'] as Timestamp).toDate()
-          : null,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      invoiceGeneratedAt: (data['invoiceGeneratedAt'] as Timestamp?)?.toDate(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? now,
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? now,
     );
   }
 
