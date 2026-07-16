@@ -5,11 +5,12 @@ class InvoiceNumberGenerator {
     required String businessName,
     required DateTime date,
     required int sequence,
+    String prefix = 'INV',
   }) {
     final initial = _getInitials(businessName);
     final month = _formatMonth(date);
     final seq = sequence.toString().padLeft(4, '0');
-    return 'INV/$initial/$month/$seq';
+    return '$prefix/$initial/$month/$seq';
   }
 
   static String _getInitials(String name) {

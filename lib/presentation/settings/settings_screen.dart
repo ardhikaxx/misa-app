@@ -73,14 +73,7 @@ class SettingsScreen extends ConsumerWidget {
             icon: Icons.receipt,
             title: AppStrings.invoiceSettings,
             subtitle: 'Pengaturan nomor invoice dan catatan',
-            onTap: () {
-              // TODO: Implement invoice settings
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fitur ini akan segera tersedia'),
-                ),
-              );
-            },
+            onTap: () => context.push(RoutePaths.invoiceSettings),
           ),
           const Divider(height: 1),
           _SettingsTile(

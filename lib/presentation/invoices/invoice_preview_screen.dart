@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
+import 'dart:io';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../providers/invoice_provider.dart';
 import '../../services/pdf_generator_service.dart';
+import '../../models/invoice_model.dart';
 
 class InvoicePreviewScreen extends ConsumerWidget {
   final String transactionId;
@@ -87,15 +89,18 @@ class InvoicePreviewScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        Expanded(
+                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () async {
                               final pdfService = PdfGeneratorService();
                               final pdfBytes =
                                   await pdfService.generateInvoicePdf(invoice);
-                              await Printing.sharePdf(
-                                bytes: pdfBytes,
-                                filename: '${invoice.invoiceNumber}.pdf',
+                              final tempDir = Directory.systemTemp;
+                              final file = File('${tempDir.path}/${invoice.invoiceNumber}.pdf');
+                              await file.writeAsBytes(pdfBytes);
+                              await Share.shareXFiles(
+                                [XFile(file.path)],
+                                text: 'Invoice ${invoice.invoiceNumber} dari ${invoice.businessName}',
                               );
                             },
                             icon: const Icon(Icons.print),
@@ -135,7 +140,7 @@ class InvoicePreviewScreen extends ConsumerWidget {
     );
   }
 
-  void _shareInvoice(dynamic invoice) async {
+  void _shareInvoice(InvoiceModel invoice) async {
     final pdfService = PdfGeneratorService();
     final pdfBytes = await pdfService.generateInvoicePdf(invoice);
     await Share.shareXFiles(
@@ -150,7 +155,7 @@ class InvoicePreviewScreen extends ConsumerWidget {
     );
   }
 
-  void _shareWhatsApp(dynamic invoice) async {
+  void _shareWhatsApp(InvoiceModel invoice) async {
     final items = invoice.items
         .map((item) => '- ${item.serviceName} x${item.quantity}: Rp ${item.lineTotal}')
         .join('\n');
@@ -158,7 +163,7 @@ class InvoicePreviewScreen extends ConsumerWidget {
       'Halo ${invoice.customerName} 👋\n\n'
       'Berikut invoice dari *${invoice.businessName}*:\n\n'
       'No: ${invoice.invoiceNumber}\n'
-      'Tanggal: ${invoice.transactionDate.day}/${invoice.transactionDate.month}/${invoice.transactionDate.year}\n\n'
+      'Tanggal: ${invoice.invoiceDate.day}/${invoice.invoiceDate.month}/${invoice.invoiceDate.year}\n\n'
       '$items\n\n'
       'Subtotal: Rp ${invoice.subtotal}\n'
       '${invoice.discountAmount > 0 ? 'Diskon: -Rp ${invoice.discountAmount}\n' : ''}'

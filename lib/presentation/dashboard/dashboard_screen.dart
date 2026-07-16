@@ -713,11 +713,7 @@ class _MoreTab extends ConsumerWidget {
           icon: Icons.receipt,
           title: AppStrings.invoiceSettings,
           subtitle: 'Pengaturan nomor invoice',
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Fitur ini akan segera tersedia')),
-            );
-          },
+          onTap: () => context.push(RoutePaths.invoiceSettings),
         ),
         const Divider(height: 1),
         _MenuTile(

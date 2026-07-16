@@ -18,4 +18,5 @@ class RoutePaths {
   static const String reports = '/reports';
   static const String settings = '/settings';
   static const String businessProfile = '/settings/business-profile';
+  static const String invoiceSettings = '/settings/invoice';
 }

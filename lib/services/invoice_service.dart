@@ -16,6 +16,10 @@ class InvoiceService {
     final business = await _businessService.getBusiness(uid);
     if (business == null) return null;
 
+    final settings = await _transactionService.getSettings(uid);
+    final footerNote = settings?['invoiceFooterNote'] as String? ??
+        'Terima kasih telah menggunakan jasa kami';
+
     final items = transaction.items
         .map((item) => InvoiceItem(
               serviceName: item.serviceName,
@@ -42,7 +46,7 @@ class InvoiceService {
       totalAmount: transaction.totalAmount,
       paymentMethod: transaction.paymentMethod,
       paymentStatus: transaction.paymentStatus,
-      footerNote: 'Terima kasih telah menggunakan jasa kami',
+      footerNote: footerNote,
       bankAccountInfo: business.bankAccountInfo,
     );
 

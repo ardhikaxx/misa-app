@@ -14,6 +14,7 @@ import '../presentation/transactions/transaction_form_screen.dart';
 import '../presentation/transactions/transaction_detail_screen.dart';
 import '../presentation/invoices/invoice_preview_screen.dart';
 import '../presentation/settings/business_profile_screen.dart';
+import '../presentation/settings/invoice_settings_screen.dart';
 import '../presentation/reports/report_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -29,6 +30,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: RoutePaths.dashboard, builder: (_, _) => const DashboardScreen()),
       GoRoute(path: RoutePaths.serviceForm, builder: (_, _) => const ServiceFormScreen()),
       GoRoute(path: RoutePaths.businessProfile, builder: (_, _) => const BusinessProfileScreen()),
+      GoRoute(path: RoutePaths.invoiceSettings, builder: (_, _) => const InvoiceSettingsScreen()),
       GoRoute(path: RoutePaths.reports, builder: (_, _) => const ReportScreen()),
       GoRoute(path: RoutePaths.customerForm, builder: (_, _) => const CustomerFormScreen()),
       GoRoute(

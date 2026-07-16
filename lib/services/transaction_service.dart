@@ -66,10 +66,12 @@ class TransactionService {
     return await _firestore.runTransaction((transaction) async {
       final settingsDoc = await transaction.get(settingsRef);
       int counter = 1;
+      String prefix = 'INV';
 
       if (settingsDoc.exists) {
         final data = settingsDoc.data()!;
         counter = (data['invoiceSequenceCounter'] ?? 0) + 1;
+        prefix = data['invoicePrefix'] ?? 'INV';
 
         transaction.update(settingsRef, {
           'invoiceSequenceCounter': counter,
@@ -90,6 +92,7 @@ class TransactionService {
         businessName: businessName,
         date: DateTime.now(),
         sequence: counter,
+        prefix: prefix,
       );
 
       return number;
@@ -138,6 +141,23 @@ class TransactionService {
 
   Future<void> deleteTransaction(String uid, String transactionId) async {
     await _firestore.doc(FirestorePaths.transactionDoc(uid, transactionId)).delete();
+  }
+
+  Stream<Map<String, dynamic>?> watchSettings(String uid) {
+    return _firestore
+        .doc(FirestorePaths.settingsDoc(uid))
+        .snapshots()
+        .map((snapshot) => snapshot.exists ? snapshot.data() : null);
+  }
+
+  Future<Map<String, dynamic>?> getSettings(String uid) async {
+    final doc = await _firestore.doc(FirestorePaths.settingsDoc(uid)).get();
+    if (!doc.exists) return null;
+    return doc.data();
+  }
+
+  Future<void> updateSettings(String uid, Map<String, dynamic> data) async {
+    await _firestore.doc(FirestorePaths.settingsDoc(uid)).update(data);
   }
 
   Future<List<TransactionModel>> getTransactionsByDateRangeSync(
