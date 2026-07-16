@@ -120,7 +120,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  initialValue: _selectedCategory.isEmpty ? null : _selectedCategory,
+                  value: _selectedCategory.isEmpty ? null : _selectedCategory,
                   decoration: const InputDecoration(
                     labelText: AppStrings.businessCategory,
                     prefixIcon: Icon(Icons.category_outlined),
