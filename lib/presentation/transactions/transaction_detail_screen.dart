@@ -5,6 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../providers/transaction_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../routing/route_paths.dart';
 import '../../core/constants/app_text_styles.dart';
 
@@ -91,8 +92,15 @@ class TransactionDetailScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(AppStrings.jobStatus,
-                            style: AppTextStyles.heading3),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(AppStrings.jobStatus,
+                                style: AppTextStyles.heading3),
+                            _buildJobStatusDropdown(
+                                context, ref, transaction.jobStatus, transactionId),
+                          ],
+                        ),
                         const SizedBox(height: 12),
                         _JobStatusStepper(currentStatus: transaction.jobStatus),
                       ],
@@ -228,6 +236,76 @@ class TransactionDetailScreen extends ConsumerWidget {
             return const Center(child: Text('Transaksi tidak ditemukan'));
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildJobStatusDropdown(BuildContext context, WidgetRef ref,
+      String currentStatus, String transactionId) {
+    final statuses = <String, String>{
+      'waiting': AppStrings.waiting,
+      'in_progress': AppStrings.inProgress,
+      'done': AppStrings.done,
+      'delivered': AppStrings.delivered,
+    };
+
+    return InkWell(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (ctx) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('Ubah Status Pekerjaan',
+                      style: AppTextStyles.heading3),
+                ),
+                ...statuses.entries.map(
+                  (e) => ListTile(
+                    leading: Icon(
+                      e.key == currentStatus
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      color: e.key == currentStatus
+                          ? AppColors.primary
+                          : AppColors.textHint,
+                    ),
+                    title: Text(e.value),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      final uid = ref.read(currentUserIdProvider);
+                      if (uid == null) return;
+                      await ref
+                          .read(transactionServiceProvider)
+                          .updateJobStatus(uid, transactionId, e.key);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Status: ${e.value}'),
+                            backgroundColor: AppColors.success,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+      child: Chip(
+        label: Text(
+          statuses[currentStatus] ?? currentStatus,
+          style: const TextStyle(fontSize: 12, color: Colors.white),
+        ),
+        backgroundColor: AppColors.primary,
+        avatar: const Icon(Icons.edit, size: 16, color: Colors.white),
+        padding: EdgeInsets.zero,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
   }
