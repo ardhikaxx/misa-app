@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(businessId) {
+      return request.auth != null && request.auth.uid == businessId;
+    }
+
+    match /businesses/{businessId} {
+      allow read, update: if isOwner(businessId);
+      allow create: if request.auth != null && request.auth.uid == businessId;
+      allow delete: if false;
+
+      match /services/{serviceId} {
+        allow read, write: if isOwner(businessId);
+      }
+
+      match /customers/{customerId} {
+        allow read, write: if isOwner(businessId);
+      }
+
+      match /transactions/{transactionId} {
+        allow read, write: if isOwner(businessId);
+      }
+
+      match /settings/{settingId} {
+        allow read, write: if isOwner(businessId);
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "970816764210",
+    "project_id": "misa-6c18f",
+    "storage_bucket": "misa-6c18f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970816764210:android:eec83e5c9f67914500ff2b",
+        "android_client_info": {
+          "package_name": "com.example.misa_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCamTivo1L8BYHDNReBeke7O7ZZzDQDABg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
