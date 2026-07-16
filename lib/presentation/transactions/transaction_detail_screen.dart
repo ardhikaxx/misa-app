@@ -239,7 +239,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                   OutlinedButton.icon(
                     onPressed: () =>
                         _sendWhatsAppReminder(context, ref, transaction),
-                    icon: const Icon(Icons.whatsapp, color: Color(0xFF25D366)),
+                    icon: const Icon(Icons.chat, color: Color(0xFF25D366)),
                     label: const Text(
                       'Kirim Reminder Pembayaran',
                       style: TextStyle(color: Color(0xFF25D366)),

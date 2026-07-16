@@ -440,7 +440,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   child: Column(
                     children: [
                       DropdownButtonFormField<String>(
-                        value: formState.paymentMethod,
+                        initialValue: formState.paymentMethod,
                         decoration: const InputDecoration(
                           labelText: AppStrings.paymentMethod,
                           prefixIcon: Icon(Icons.payment),
@@ -463,7 +463,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
-                        value: formState.paymentStatus,
+                        initialValue: formState.paymentStatus,
                         decoration: const InputDecoration(
                           labelText: AppStrings.paymentStatus,
                           prefixIcon: Icon(Icons.check_circle_outline),
