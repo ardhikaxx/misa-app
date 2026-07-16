@@ -12,7 +12,20 @@
           "package_name": "com.example.misa_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "970816764210-1srqoqelimiiqquil4dt9nqjq2gmh6u0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.misa_app",
+            "certificate_hash": "f0b7683c2c2e77674954fdbeb0b4d88c11736e16"
+          }
+        },
+        {
+          "client_id": "970816764210-inum58taqnm6gqgl8l4slrbetitfjtjj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCamTivo1L8BYHDNReBeke7O7ZZzDQDABg"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "970816764210-inum58taqnm6gqgl8l4slrbetitfjtjj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

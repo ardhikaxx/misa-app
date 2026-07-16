@@ -23,20 +23,20 @@ class BusinessService {
 
   Future<void> updateBusiness(String uid, Map<String, dynamic> data) async {
     data['updatedAt'] = FieldValue.serverTimestamp();
-    await _firestore.doc(FirestorePaths.businessDoc(uid)).update(data);
+    await _firestore.doc(FirestorePaths.businessDoc(uid)).set(data, SetOptions(merge: true));
   }
 
   Future<void> completeSetup(String uid) async {
-    await _firestore.doc(FirestorePaths.businessDoc(uid)).update({
+    await _firestore.doc(FirestorePaths.businessDoc(uid)).set({
       'isSetupComplete': true,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }, SetOptions(merge: true));
   }
 
   Future<void> updateLogo(String uid, String logoUrl) async {
-    await _firestore.doc(FirestorePaths.businessDoc(uid)).update({
+    await _firestore.doc(FirestorePaths.businessDoc(uid)).set({
       'logoUrl': logoUrl,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }, SetOptions(merge: true));
   }
 }
