@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/validators.dart';
+import '../../core/utils/app_toast.dart';
 import '../../providers/auth_provider.dart';
 import '../../routing/route_paths.dart';
 import '../../core/constants/app_text_styles.dart';
@@ -41,19 +42,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (mounted) {
       final authState = ref.read(authNotifierProvider);
       if (authState.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authState.error.toString()),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppToast.error(context, authState.error.toString());
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.registerSuccess),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        AppToast.success(context, AppStrings.registerSuccess);
       }
     }
   }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/validators.dart';
+import '../../core/utils/app_toast.dart';
 import '../../providers/auth_provider.dart';
 import '../../routing/route_paths.dart';
 import '../../core/constants/app_text_styles.dart';
@@ -39,12 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (mounted) {
       final authState = ref.read(authNotifierProvider);
       if (authState.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authState.error.toString()),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppToast.error(context, authState.error.toString());
       }
     }
   }
@@ -55,24 +51,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (mounted) {
       final authState = ref.read(authNotifierProvider);
       if (authState.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authState.error.toString()),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppToast.error(context, authState.error.toString());
       }
     }
   }
 
   Future<void> _handleForgotPassword() async {
     if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Masukkan email terlebih dahulu'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      AppToast.warning(context, 'Masukkan email terlebih dahulu');
       return;
     }
 
@@ -81,21 +67,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             _emailController.text.trim(),
           );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.resetPasswordSent),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        AppToast.success(context, AppStrings.resetPasswordSent);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppToast.error(context, e.toString());
       }
     }
   }

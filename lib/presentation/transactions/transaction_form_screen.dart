@@ -12,6 +12,7 @@ import '../../providers/service_catalog_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../routing/route_paths.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/utils/app_toast.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
   const TransactionFormScreen({super.key});
@@ -251,21 +252,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
   Future<void> _handleSave() async {
     if (_selectedCustomer == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.noCustomerSelected),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      AppToast.warning(context, AppStrings.noCustomerSelected);
       return;
     }
     if (_items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.selectAtLeastOneService),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      AppToast.warning(context, AppStrings.selectAtLeastOneService);
       return;
     }
 
@@ -283,23 +274,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       if (success) {
         ref.invalidate(transactionListProvider);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Transaksi berhasil disimpan'),
-              backgroundColor: AppColors.success,
-            ),
-          );
+          AppToast.success(context, 'Transaksi berhasil disimpan');
           context.pop();
         }
       } else {
         final state = ref.read(transactionFormProvider);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage ?? 'Gagal menyimpan'),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          AppToast.error(context, state.errorMessage ?? 'Gagal menyimpan');
         }
       }
     }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/validators.dart';
+import '../../core/utils/app_toast.dart';
 import '../../providers/service_catalog_provider.dart';
 
 class ServiceFormScreen extends ConsumerStatefulWidget {
@@ -71,12 +72,7 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
       });
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Layanan tidak ditemukan'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppToast.error(context, 'Layanan tidak ditemukan');
         context.pop();
       }
     }
@@ -107,23 +103,13 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
     if (success) {
       ref.invalidate(serviceListProvider);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Layanan berhasil disimpan'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        AppToast.success(context, 'Layanan berhasil disimpan');
         context.pop();
       }
     } else {
       if (context.mounted) {
         final state = ref.read(serviceFormProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(state.errorMessage ?? 'Gagal menyimpan'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppToast.error(context, state.errorMessage ?? 'Gagal menyimpan');
       }
     }
   }

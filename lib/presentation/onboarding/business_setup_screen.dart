@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/validators.dart';
+import '../../core/utils/app_toast.dart';
 import '../../models/business_model.dart';
 import '../../providers/business_provider.dart';
 import '../../routing/route_paths.dart';
@@ -38,12 +39,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pilih kategori usaha'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      AppToast.warning(context, 'Pilih kategori usaha');
       return;
     }
 
@@ -64,12 +60,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       if (state.hasError) {
         setState(() => _isSubmitting = false);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Gagal menyimpan: ${state.error}'),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          AppToast.error(context, 'Gagal menyimpan: ${state.error}');
         }
       } else {
         if (mounted) {
@@ -79,12 +70,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppToast.error(context, 'Error: $e');
       }
     }
   }

@@ -8,6 +8,7 @@ import '../../providers/transaction_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../routing/route_paths.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/utils/app_toast.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
   final String transactionId;
@@ -281,12 +282,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                           .read(transactionServiceProvider)
                           .updateJobStatus(uid, transactionId, e.key);
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Status: ${e.value}'),
-                            backgroundColor: AppColors.success,
-                          ),
-                        );
+                        AppToast.success(context, 'Status: ${e.value}');
                       }
                     },
                   ),

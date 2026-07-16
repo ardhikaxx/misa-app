@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/validators.dart';
+import '../../core/utils/app_toast.dart';
 import '../../providers/customer_provider.dart';
 
 class CustomerFormScreen extends ConsumerStatefulWidget {
@@ -71,12 +72,7 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
       });
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Pelanggan tidak ditemukan'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppToast.error(context, 'Pelanggan tidak ditemukan');
         context.pop();
       }
     }
@@ -107,23 +103,13 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
       if (success) {
         ref.invalidate(customerListProvider);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Pelanggan berhasil disimpan'),
-              backgroundColor: AppColors.success,
-            ),
-          );
+          AppToast.success(context, 'Pelanggan berhasil disimpan');
           context.pop();
         }
       } else {
         final state = ref.read(customerFormProvider);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage ?? 'Gagal menyimpan'),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          AppToast.error(context, state.errorMessage ?? 'Gagal menyimpan');
         }
       }
     }
