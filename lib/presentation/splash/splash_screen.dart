@@ -17,6 +17,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
+  bool _navigated = false;
 
   @override
   void initState() {
@@ -39,18 +40,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authState = ref.watch(authStateProvider);
-      final isSetupComplete = ref.watch(isSetupCompleteProvider);
+    final authState = ref.watch(authStateProvider);
+    final isSetupComplete = ref.watch(isSetupCompleteProvider);
 
-      if (authState.hasValue) {
-        if (authState.valueOrNull != null && isSetupComplete) {
-          context.go(RoutePaths.dashboard);
-        } else if (authState.valueOrNull != null && !isSetupComplete) {
-          context.go(RoutePaths.onboarding);
-        } else {
-          context.go(RoutePaths.login);
-        }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_navigated || !mounted) return;
+
+      if (authState.isLoading) return;
+
+      _navigated = true;
+
+      if (authState.valueOrNull == null) {
+        context.go(RoutePaths.login);
+      } else if (isSetupComplete) {
+        context.go(RoutePaths.dashboard);
+      } else {
+        context.go(RoutePaths.onboarding);
       }
     });
 

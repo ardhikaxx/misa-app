@@ -36,14 +36,16 @@ class BusinessSetupNotifier extends StateNotifier<AsyncValue<void>> {
     try {
       final uid = ref.read(currentUserIdProvider);
       if (uid == null) throw Exception('User tidak ditemukan');
-      await ref.read(businessServiceProvider).updateBusiness(uid, {
+
+      await ref.read(businessServiceProvider).setBusiness(uid, {
         'ownerName': ownerName,
         'businessName': businessName,
         'businessCategory': businessCategory,
         'address': address,
         'whatsappNumber': whatsappNumber,
+        'isSetupComplete': true,
       });
-      await ref.read(businessServiceProvider).completeSetup(uid);
+
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

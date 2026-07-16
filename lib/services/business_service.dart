@@ -9,6 +9,11 @@ class BusinessService {
     await _firestore.doc(FirestorePaths.businessDoc(uid)).set(business.toMap());
   }
 
+  Future<void> setBusiness(String uid, Map<String, dynamic> data) async {
+    data['updatedAt'] = FieldValue.serverTimestamp();
+    await _firestore.doc(FirestorePaths.businessDoc(uid)).set(data, SetOptions(merge: true));
+  }
+
   Future<BusinessModel?> getBusiness(String uid) async {
     final doc = await _firestore.doc(FirestorePaths.businessDoc(uid)).get();
     if (!doc.exists) return null;
@@ -24,13 +29,6 @@ class BusinessService {
   Future<void> updateBusiness(String uid, Map<String, dynamic> data) async {
     data['updatedAt'] = FieldValue.serverTimestamp();
     await _firestore.doc(FirestorePaths.businessDoc(uid)).set(data, SetOptions(merge: true));
-  }
-
-  Future<void> completeSetup(String uid) async {
-    await _firestore.doc(FirestorePaths.businessDoc(uid)).set({
-      'isSetupComplete': true,
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
   }
 
   Future<void> updateLogo(String uid, String logoUrl) async {

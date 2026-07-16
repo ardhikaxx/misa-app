@@ -62,8 +62,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
 
       final state = ref.read(businessSetupProvider);
       if (state.hasError) {
+        setState(() => _isSubmitting = false);
         if (mounted) {
-          setState(() => _isSubmitting = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Gagal menyimpan: ${state.error}'),

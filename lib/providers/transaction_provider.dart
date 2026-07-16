@@ -1,15 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/transaction_service.dart';
-import '../services/customer_service.dart';
 import '../models/transaction_model.dart';
 import '../models/transaction_item_model.dart';
 import 'auth_provider.dart';
 
 final transactionServiceProvider = Provider<TransactionService>(
     (ref) => TransactionService());
-
-final customerServiceProvider = Provider<CustomerService>(
-    (ref) => CustomerService());
 
 final transactionListProvider = StreamProvider<List<TransactionModel>>((ref) {
   final uid = ref.watch(currentUserIdProvider);
