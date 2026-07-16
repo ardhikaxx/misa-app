@@ -1,11 +1,13 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/business_provider.dart';
 import '../../routing/route_paths.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/utils/app_toast.dart';
@@ -230,6 +232,34 @@ class TransactionDetailScreen extends ConsumerWidget {
                     icon: const Icon(Icons.receipt),
                     label: const Text(AppStrings.previewInvoice),
                   ),
+
+                // ── Reminder WhatsApp (hanya untuk unpaid/partial) ──
+                if (transaction.paymentStatus != 'paid') ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        _sendWhatsAppReminder(context, ref, transaction),
+                    icon: const Icon(Icons.whatsapp, color: Color(0xFF25D366)),
+                    label: const Text(
+                      'Kirim Reminder Pembayaran',
+                      style: TextStyle(color: Color(0xFF25D366)),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFF25D366)),
+                    ),
+                  ),
+                ],
+
+                // ── Duplikasi Transaksi ──
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      _duplicateTransaction(context, ref, transaction),
+                  icon: const Icon(Icons.copy_all),
+                  label: const Text('Duplikasi Transaksi'),
+                ),
+
+                const SizedBox(height: 24),
               ],
             ),
           );
@@ -239,6 +269,103 @@ class TransactionDetailScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  /// Buka WhatsApp dengan pesan reminder pembayaran siap kirim
+  Future<void> _sendWhatsAppReminder(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic transaction,
+  ) async {
+    final business = ref.read(businessProfileSyncProvider);
+    final remaining = transaction.totalAmount - transaction.amountPaid;
+    final phone = transaction.customerSnapshot.phoneNumber
+        .replaceAll(RegExp(r'[^\d]'), '')
+        .replaceFirst(RegExp(r'^0'), '62');
+
+    final businessName = business?.businessName ?? 'Kami';
+    final bank = business?.bankAccountInfo;
+    final bankInfo = (bank != null &&
+            bank['accountNumber'] != null &&
+            bank['accountNumber']!.isNotEmpty)
+        ? '\n\nInfo Pembayaran:\n'
+            '${bank['bankName'] ?? ''} - ${bank['accountNumber'] ?? ''}\n'
+            'a.n. ${bank['accountHolder'] ?? ''}'
+        : '';
+
+    final message = 'Halo ${transaction.customerSnapshot.name},\n\n'
+        'Kami dari *$businessName* ingin mengingatkan bahwa tagihan Anda '
+        'belum lunas.\n\n'
+        'No. Invoice: *${transaction.invoiceNumber}*\n'
+        'Total Tagihan: *${CurrencyFormatter.format(transaction.totalAmount)}*\n'
+        '${transaction.paymentStatus == 'partial' ? 'Sudah Dibayar: *${CurrencyFormatter.format(transaction.amountPaid)}*\n' : ''}'
+        'Sisa Tagihan: *${CurrencyFormatter.format(remaining)}*'
+        '$bankInfo\n\n'
+        'Terima kasih 🙏';
+
+    final url = Uri.parse(
+        'https://wa.me/$phone?text=${Uri.encodeComponent(message)}');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else if (context.mounted) {
+      AppToast.error(context, 'Tidak bisa membuka WhatsApp');
+    }
+  }
+
+  /// Duplikasi transaksi — buat transaksi baru dengan data yang sama
+  Future<void> _duplicateTransaction(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic transaction,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Duplikasi Transaksi'),
+        content: Text(
+          'Buat transaksi baru berdasarkan\n'
+          '${transaction.invoiceNumber} - ${transaction.customerSnapshot.name}?\n\n'
+          'Status akan direset ke: Belum Bayar & Menunggu.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(AppStrings.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Duplikasi'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    final uid = ref.read(currentUserIdProvider);
+    if (uid == null) return;
+
+    final business = ref.read(businessProfileSyncProvider);
+    final service = ref.read(transactionServiceProvider);
+
+    try {
+      final invoiceNumber = await service.generateInvoiceNumber(
+          uid, business?.businessName ?? 'MISA');
+      final newId =
+          await service.duplicateTransaction(uid, transaction, invoiceNumber);
+
+      if (context.mounted) {
+        AppToast.success(context, 'Transaksi berhasil diduplikasi');
+        context.push(
+          '${RoutePaths.transactionDetail.replaceAll(':id', '')}$newId',
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppToast.error(context, 'Gagal menduplikasi: $e');
+      }
+    }
   }
 
   Widget _buildJobStatusDropdown(BuildContext context, WidgetRef ref,

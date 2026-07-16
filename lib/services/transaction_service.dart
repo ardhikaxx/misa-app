@@ -175,4 +175,47 @@ class TransactionService {
         .map((doc) => TransactionModel.fromFirestore(doc))
         .toList();
   }
+
+  /// Ambil semua transaksi yang belum lunas (unpaid + partial) untuk dashboard piutang
+  Future<List<TransactionModel>> getUnpaidTransactions(String uid) async {
+    final unpaid = await _firestore
+        .collection(FirestorePaths.transactionsCollection(uid))
+        .where('paymentStatus', whereIn: ['unpaid', 'partial'])
+        .get();
+
+    return unpaid.docs
+        .map((doc) => TransactionModel.fromFirestore(doc))
+        .toList();
+  }
+
+  /// Duplikasi transaksi: buat transaksi baru berdasarkan data transaksi yang ada
+  Future<String> duplicateTransaction(
+    String uid,
+    TransactionModel source,
+    String newInvoiceNumber,
+  ) async {
+    final now = DateTime.now();
+    final duplicate = TransactionModel(
+      transactionId: '',
+      invoiceNumber: newInvoiceNumber,
+      transactionDate: now,
+      customerId: source.customerId,
+      customerSnapshot: source.customerSnapshot,
+      items: source.items,
+      subtotal: source.subtotal,
+      discountAmount: source.discountAmount,
+      discountNote: source.discountNote,
+      additionalFee: source.additionalFee,
+      additionalFeeNote: source.additionalFeeNote,
+      totalAmount: source.totalAmount,
+      paymentMethod: source.paymentMethod,
+      paymentStatus: 'unpaid', // selalu mulai dari unpaid
+      amountPaid: 0,
+      jobStatus: 'waiting', // selalu mulai dari waiting
+      notes: source.notes,
+      createdAt: now,
+      updatedAt: now,
+    );
+    return createTransaction(uid, duplicate);
+  }
 }

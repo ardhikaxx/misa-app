@@ -160,12 +160,27 @@ class _HomeTab extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _SummaryCard(
-                  title: AppStrings.pendingJobs,
-                  value: '${data.pendingJobs} pekerjaan',
-                  icon: Icons.pending_actions,
-                  color: AppColors.warning,
-                  isFullWidth: true,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _SummaryCard(
+                        title: AppStrings.pendingJobs,
+                        value: '${data.pendingJobs} pekerjaan',
+                        icon: Icons.pending_actions,
+                        color: AppColors.warning,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _ReceivablesCard(
+                        total: data.totalReceivables,
+                        count: data.receivablesCount,
+                        onTap: () {
+                          ref.read(_dashboardTabProvider.notifier).state = 3;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -474,6 +489,8 @@ class _TransactionsTab extends ConsumerStatefulWidget {
 class _TransactionsTabState extends ConsumerState<_TransactionsTab> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  String? _paymentFilter; // null = semua, 'paid','unpaid','partial'
+  String? _jobFilter;     // null = semua, 'waiting','in_progress','done','delivered'
 
   @override
   void dispose() {
@@ -526,16 +543,110 @@ class _TransactionsTabState extends ConsumerState<_TransactionsTab> {
           ),
         ),
         const SizedBox(height: 8),
+        // ── Filter Chips Pembayaran ──
+        SizedBox(
+          height: 36,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            children: [
+              _FilterChip(
+                label: 'Semua',
+                selected: _paymentFilter == null,
+                color: AppColors.primary,
+                onTap: () => setState(() => _paymentFilter = null),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: AppStrings.unpaid,
+                selected: _paymentFilter == 'unpaid',
+                color: AppColors.unpaid,
+                onTap: () => setState(
+                    () => _paymentFilter = _paymentFilter == 'unpaid' ? null : 'unpaid'),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: AppStrings.partial,
+                selected: _paymentFilter == 'partial',
+                color: AppColors.partial,
+                onTap: () => setState(
+                    () => _paymentFilter = _paymentFilter == 'partial' ? null : 'partial'),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: AppStrings.paid,
+                selected: _paymentFilter == 'paid',
+                color: AppColors.paid,
+                onTap: () => setState(
+                    () => _paymentFilter = _paymentFilter == 'paid' ? null : 'paid'),
+              ),
+              const SizedBox(width: 16),
+              const VerticalDivider(width: 1),
+              const SizedBox(width: 16),
+              _FilterChip(
+                label: AppStrings.waiting,
+                selected: _jobFilter == 'waiting',
+                color: AppColors.waiting,
+                onTap: () => setState(
+                    () => _jobFilter = _jobFilter == 'waiting' ? null : 'waiting'),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: AppStrings.inProgress,
+                selected: _jobFilter == 'in_progress',
+                color: AppColors.inProgress,
+                onTap: () => setState(
+                    () => _jobFilter = _jobFilter == 'in_progress' ? null : 'in_progress'),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: AppStrings.done,
+                selected: _jobFilter == 'done',
+                color: AppColors.done,
+                onTap: () => setState(
+                    () => _jobFilter = _jobFilter == 'done' ? null : 'done'),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: AppStrings.delivered,
+                selected: _jobFilter == 'delivered',
+                color: AppColors.delivered,
+                onTap: () => setState(
+                    () => _jobFilter = _jobFilter == 'delivered' ? null : 'delivered'),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
         Expanded(
           child: transactionsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, st) => Center(child: Text('Error: $e')),
             data: (transactions) {
-              final filtered = _searchQuery.isEmpty
-                  ? transactions
-                  : transactions.where((t) =>
-                      t.customerSnapshot.name.toLowerCase().contains(_searchQuery) ||
-                      t.invoiceNumber.toLowerCase().contains(_searchQuery)).toList();
+              var filtered = transactions;
+
+              // Filter pencarian
+              if (_searchQuery.isNotEmpty) {
+                filtered = filtered
+                    .where((t) =>
+                        t.customerSnapshot.name.toLowerCase().contains(_searchQuery) ||
+                        t.invoiceNumber.toLowerCase().contains(_searchQuery))
+                    .toList();
+              }
+
+              // Filter payment status
+              if (_paymentFilter != null) {
+                filtered = filtered
+                    .where((t) => t.paymentStatus == _paymentFilter)
+                    .toList();
+              }
+
+              // Filter job status
+              if (_jobFilter != null) {
+                filtered = filtered
+                    .where((t) => t.jobStatus == _jobFilter)
+                    .toList();
+              }
 
               if (transactions.isEmpty) {
                 return Center(
@@ -558,8 +669,25 @@ class _TransactionsTabState extends ConsumerState<_TransactionsTab> {
                 );
               }
               if (filtered.isEmpty) {
-                return const Center(
-                  child: Text('Transaksi tidak ditemukan', style: AppTextStyles.bodySmall),
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.filter_list_off, size: 48, color: AppColors.textHint),
+                      const SizedBox(height: 12),
+                      const Text('Tidak ada transaksi yang sesuai', style: AppTextStyles.bodySmall),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => setState(() {
+                          _paymentFilter = null;
+                          _jobFilter = null;
+                          _searchQuery = '';
+                          _searchController.clear();
+                        }),
+                        child: const Text('Reset Filter'),
+                      ),
+                    ],
+                  ),
                 );
               }
               return ListView.builder(
@@ -833,6 +961,109 @@ class _SummaryCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Kartu piutang khusus — menampilkan total tagihan belum lunas, bisa di-tap untuk filter
+class _ReceivablesCard extends StatelessWidget {
+  final int total;
+  final int count;
+  final VoidCallback onTap;
+
+  const _ReceivablesCard({
+    required this.total,
+    required this.count,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = AppColors.unpaid;
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.account_balance_wallet_outlined, color: color, size: 20),
+                  ),
+                  const Spacer(),
+                  const Icon(Icons.chevron_right, size: 16, color: AppColors.textHint),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text('Piutang', style: AppTextStyles.bodySmall),
+              const SizedBox(height: 2),
+              Text(
+                CurrencyFormatter.format(total),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: total > 0 ? color : AppColors.textSecondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                '$count tagihan',
+                style: const TextStyle(fontSize: 11, color: AppColors.textHint),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Filter chip untuk tab transaksi
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? color : color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color, width: 1),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : color,
+          ),
         ),
       ),
     );

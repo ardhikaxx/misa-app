@@ -43,6 +43,9 @@ dependencies:
   # Charts
   fl_chart: ^0.70.2
 
+  # URL Launcher (untuk buka WhatsApp reminder)
+  url_launcher: ^6.3.1
+
   # Local notifications
   flutter_local_notifications: ^18.0.1
 
