@@ -106,21 +106,25 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
     if (mounted) {
       if (success) {
         ref.invalidate(customerListProvider);
-        context.pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Pelanggan berhasil disimpan'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Pelanggan berhasil disimpan'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          context.pop();
+        }
       } else {
         final state = ref.read(customerFormProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(state.errorMessage ?? 'Gagal menyimpan'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage ?? 'Gagal menyimpan'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     }
   }

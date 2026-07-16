@@ -56,7 +56,7 @@ class CustomerFormState {
       address: address ?? this.address,
       notes: notes ?? this.notes,
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      errorMessage: errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }
@@ -84,7 +84,15 @@ class CustomerFormNotifier extends StateNotifier<CustomerFormState> {
   void updateNotes(String v) => state = state.copyWith(notes: v);
 
   Future<bool> save() async {
-    state = state.copyWith(isSubmitting: true, errorMessage: null);
+    state = CustomerFormState(
+      customerId: state.customerId,
+      name: state.name,
+      phoneNumber: state.phoneNumber,
+      email: state.email,
+      address: state.address,
+      notes: state.notes,
+      isSubmitting: true,
+    );
     try {
       final uid = ref.read(currentUserIdProvider);
       if (uid == null) throw Exception('User tidak ditemukan');

@@ -70,7 +70,7 @@ class ServiceFormState {
       description: description ?? this.description,
       isActive: isActive ?? this.isActive,
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      errorMessage: errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }
@@ -105,7 +105,16 @@ class ServiceFormNotifier extends StateNotifier<ServiceFormState> {
       state = state.copyWith(description: value);
 
   Future<bool> save() async {
-    state = state.copyWith(isSubmitting: true, errorMessage: null);
+    state = ServiceFormState(
+      serviceId: state.serviceId,
+      serviceName: state.serviceName,
+      category: state.category,
+      price: state.price,
+      estimatedDuration: state.estimatedDuration,
+      description: state.description,
+      isActive: state.isActive,
+      isSubmitting: true,
+    );
     try {
       final uid = ref.read(currentUserIdProvider);
       if (uid == null) throw Exception('User tidak ditemukan');

@@ -282,21 +282,25 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     if (mounted) {
       if (success) {
         ref.invalidate(transactionListProvider);
-        context.pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Transaksi berhasil disimpan'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Transaksi berhasil disimpan'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          context.pop();
+        }
       } else {
         final state = ref.read(transactionFormProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(state.errorMessage ?? 'Gagal menyimpan'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage ?? 'Gagal menyimpan'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     }
   }

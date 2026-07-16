@@ -107,13 +107,13 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
     if (success) {
       ref.invalidate(serviceListProvider);
       if (context.mounted) {
-        context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Layanan berhasil disimpan'),
             backgroundColor: AppColors.success,
           ),
         );
+        context.pop();
       }
     } else {
       if (context.mounted) {

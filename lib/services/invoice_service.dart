@@ -46,7 +46,9 @@ class InvoiceService {
       bankAccountInfo: business.bankAccountInfo,
     );
 
-    await _transactionService.markInvoiceGenerated(uid, transactionId);
+    if (transaction.invoiceGeneratedAt == null) {
+      await _transactionService.markInvoiceGenerated(uid, transactionId);
+    }
 
     return invoice;
   }

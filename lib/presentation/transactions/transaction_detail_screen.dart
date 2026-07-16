@@ -208,7 +208,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                 if (transaction.invoiceGeneratedAt == null)
                   ElevatedButton.icon(
                     onPressed: () => context.push(
-                      '${RoutePaths.invoicePreview.replaceAll(':id', '')}$transactionId',
+                      RoutePaths.invoicePreview.replaceAll(':id', transactionId),
                     ),
                     icon: const Icon(Icons.receipt),
                     label: const Text(AppStrings.createInvoice),
@@ -216,7 +216,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                 else
                   OutlinedButton.icon(
                     onPressed: () => context.push(
-                      '${RoutePaths.invoicePreview.replaceAll(':id', '')}$transactionId',
+                      RoutePaths.invoicePreview.replaceAll(':id', transactionId),
                     ),
                     icon: const Icon(Icons.receipt),
                     label: const Text(AppStrings.previewInvoice),

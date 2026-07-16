@@ -88,7 +88,7 @@ class TransactionFormState {
       jobStatus: jobStatus ?? this.jobStatus,
       notes: notes ?? this.notes,
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      errorMessage: errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }
@@ -124,7 +124,22 @@ class TransactionFormNotifier extends StateNotifier<TransactionFormState> {
   void reset() => state = const TransactionFormState();
 
   Future<bool> save() async {
-    state = state.copyWith(isSubmitting: true, errorMessage: null);
+    state = TransactionFormState(
+      transactionId: state.transactionId,
+      customerId: state.customerId,
+      customerSnapshot: state.customerSnapshot,
+      items: state.items,
+      discountAmount: state.discountAmount,
+      discountNote: state.discountNote,
+      additionalFee: state.additionalFee,
+      additionalFeeNote: state.additionalFeeNote,
+      paymentMethod: state.paymentMethod,
+      paymentStatus: state.paymentStatus,
+      amountPaid: state.amountPaid,
+      jobStatus: state.jobStatus,
+      notes: state.notes,
+      isSubmitting: true,
+    );
     try {
       final uid = ref.read(currentUserIdProvider);
       if (uid == null) throw Exception('User tidak ditemukan');

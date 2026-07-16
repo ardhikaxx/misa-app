@@ -167,10 +167,14 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                                     'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
                                     'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'
                                   ];
+                                  final index = value.toInt();
+                                  if (index < 0 || index >= months.length) {
+                                    return const SizedBox.shrink();
+                                  }
                                   return Padding(
                                     padding: const EdgeInsets.only(top: 8),
                                     child: Text(
-                                      months[value.toInt()],
+                                      months[index],
                                       style: const TextStyle(fontSize: 10),
                                     ),
                                   );
