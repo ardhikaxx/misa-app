@@ -55,8 +55,7 @@ class PdfGeneratorService {
             ),
             pw.SizedBox(height: 4),
             pw.Text(invoice.businessAddress, style: const pw.TextStyle(fontSize: 10)),
-            pw.Text('Telp: ${invoice.businessPhone}',
-                style: const pw.TextStyle(fontSize: 10)),
+            pw.Text('Telp: ${invoice.businessPhone}', style: const pw.TextStyle(fontSize: 10)),
           ],
         ),
         pw.Column(

@@ -96,7 +96,9 @@ class InvoicePreviewScreen extends ConsumerWidget {
                               final pdfBytes =
                                   await pdfService.generateInvoicePdf(invoice);
                               final tempDir = Directory.systemTemp;
-                              final file = File('${tempDir.path}/${invoice.invoiceNumber}.pdf');
+                              final safeName = invoice.invoiceNumber.replaceAll('/', '_');
+                              final file = File('${tempDir.path}/$safeName.pdf');
+                              await file.create(recursive: true);
                               await file.writeAsBytes(pdfBytes);
                               await Share.shareXFiles(
                                 [XFile(file.path)],
@@ -143,14 +145,13 @@ class InvoicePreviewScreen extends ConsumerWidget {
   void _shareInvoice(InvoiceModel invoice) async {
     final pdfService = PdfGeneratorService();
     final pdfBytes = await pdfService.generateInvoicePdf(invoice);
+    final tempDir = Directory.systemTemp;
+    final safeName = invoice.invoiceNumber.replaceAll('/', '_');
+    final file = File('${tempDir.path}/$safeName.pdf');
+    await file.create(recursive: true);
+    await file.writeAsBytes(pdfBytes);
     await Share.shareXFiles(
-      [
-        XFile.fromData(
-          pdfBytes,
-          mimeType: 'application/pdf',
-          name: '${invoice.invoiceNumber}.pdf',
-        ),
-      ],
+      [XFile(file.path)],
       text: 'Invoice ${invoice.invoiceNumber} dari ${invoice.businessName}',
     );
   }
