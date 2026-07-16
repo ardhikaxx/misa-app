@@ -23,6 +23,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   final _addressController = TextEditingController();
   final _whatsappController = TextEditingController();
   String _selectedCategory = '';
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -34,6 +35,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   }
 
   Future<void> _handleSetup() async {
+    if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -45,33 +47,50 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       return;
     }
 
-    await ref.read(businessSetupProvider.notifier).setup(
-          ownerName: _ownerNameController.text.trim(),
-          businessName: _businessNameController.text.trim(),
-          businessCategory: _selectedCategory,
-          address: _addressController.text.trim(),
-          whatsappNumber: _whatsappController.text.trim(),
-        );
+    setState(() => _isSubmitting = true);
 
-    if (mounted) {
+    try {
+      await ref.read(businessSetupProvider.notifier).setup(
+            ownerName: _ownerNameController.text.trim(),
+            businessName: _businessNameController.text.trim(),
+            businessCategory: _selectedCategory,
+            address: _addressController.text.trim(),
+            whatsappNumber: _whatsappController.text.trim(),
+          );
+
+      if (!mounted) return;
+
       final state = ref.read(businessSetupProvider);
       if (state.hasError) {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal menyimpan: ${state.error}'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          context.go(RoutePaths.dashboard);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(state.error.toString()),
+            content: Text('Error: $e'),
             backgroundColor: AppColors.error,
           ),
         );
-      } else {
-        context.go(RoutePaths.dashboard);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final setupState = ref.watch(businessSetupProvider);
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -161,8 +180,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
-                  onPressed: setupState.isLoading ? null : _handleSetup,
-                  child: setupState.isLoading
+                  onPressed: _isSubmitting ? null : _handleSetup,
+                  child: _isSubmitting
                       ? const SizedBox(
                           width: 20,
                           height: 20,

@@ -7,9 +7,9 @@ service cloud.firestore {
     }
 
     match /businesses/{businessId} {
-      allow read, update: if isOwner(businessId);
+      allow read: if isOwner(businessId);
       allow create: if request.auth != null && request.auth.uid == businessId;
-      allow delete: if false;
+      allow update, delete: if isOwner(businessId);
 
       match /services/{serviceId} {
         allow read, write: if isOwner(businessId);
