@@ -14,6 +14,7 @@ import '../presentation/transactions/transaction_form_screen.dart';
 import '../presentation/transactions/transaction_detail_screen.dart';
 import '../presentation/invoices/invoice_preview_screen.dart';
 import '../presentation/settings/business_profile_screen.dart';
+import '../presentation/reports/report_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -42,6 +43,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => InvoicePreviewScreen(transactionId: state.pathParameters['id']!),
       ),
       GoRoute(path: RoutePaths.businessProfile, builder: (_, _) => const BusinessProfileScreen()),
+      GoRoute(path: RoutePaths.reports, builder: (_, _) => const ReportScreen()),
     ],
     redirect: (context, state) {
       final isLoggedIn = authState.valueOrNull != null;

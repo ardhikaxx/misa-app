@@ -3,6 +3,7 @@ import '../services/transaction_service.dart';
 import '../models/transaction_model.dart';
 import '../models/transaction_item_model.dart';
 import 'auth_provider.dart';
+import 'business_provider.dart';
 
 final transactionServiceProvider = Provider<TransactionService>(
     (ref) => TransactionService());
@@ -147,7 +148,8 @@ class TransactionFormNotifier extends StateNotifier<TransactionFormState> {
           'jobStatus': state.jobStatus, 'notes': state.notes.isEmpty ? null : state.notes,
         });
       } else {
-        final invoiceNumber = await service.generateInvoiceNumber(uid, 'MISA');
+        final business = ref.read(businessProfileSyncProvider);
+        final invoiceNumber = await service.generateInvoiceNumber(uid, business?.businessName ?? 'MISA');
         await service.createTransaction(uid, TransactionModel(
           transactionId: '', invoiceNumber: invoiceNumber, transactionDate: now,
           customerId: state.customerId, customerSnapshot: state.customerSnapshot!,

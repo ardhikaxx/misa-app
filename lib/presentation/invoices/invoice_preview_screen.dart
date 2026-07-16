@@ -83,29 +83,46 @@ class InvoicePreviewScreen extends ConsumerWidget {
               ),
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: Column(
                   children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () async {
-                          final pdfService = PdfGeneratorService();
-                          final pdfBytes =
-                              await pdfService.generateInvoicePdf(invoice);
-                          await Printing.sharePdf(
-                            bytes: pdfBytes,
-                            filename: '${invoice.invoiceNumber}.pdf',
-                          );
-                        },
-                        icon: const Icon(Icons.print),
-                        label: const Text(AppStrings.printInvoice),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              final pdfService = PdfGeneratorService();
+                              final pdfBytes =
+                                  await pdfService.generateInvoicePdf(invoice);
+                              await Printing.sharePdf(
+                                bytes: pdfBytes,
+                                filename: '${invoice.invoiceNumber}.pdf',
+                              );
+                            },
+                            icon: const Icon(Icons.print),
+                            label: const Text(AppStrings.printInvoice),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _shareInvoice(invoice),
+                            icon: const Icon(Icons.share),
+                            label: const Text(AppStrings.shareInvoice),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _shareInvoice(invoice),
-                        icon: const Icon(Icons.share),
-                        label: const Text(AppStrings.shareInvoice),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _shareWhatsApp(invoice),
+                        icon: const Icon(Icons.chat, color: Color(0xFF25D366)),
+                        label: const Text('Bagikan via WhatsApp',
+                            style: TextStyle(color: Color(0xFF25D366))),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF25D366)),
+                        ),
                       ),
                     ),
                   ],
@@ -131,5 +148,24 @@ class InvoicePreviewScreen extends ConsumerWidget {
       ],
       text: 'Invoice ${invoice.invoiceNumber} dari ${invoice.businessName}',
     );
+  }
+
+  void _shareWhatsApp(dynamic invoice) async {
+    final items = invoice.items
+        .map((item) => '- ${item.serviceName} x${item.quantity}: Rp ${item.lineTotal}')
+        .join('\n');
+    final text = Uri.encodeComponent(
+      'Halo ${invoice.customerName} 👋\n\n'
+      'Berikut invoice dari *${invoice.businessName}*:\n\n'
+      'No: ${invoice.invoiceNumber}\n'
+      'Tanggal: ${invoice.transactionDate.day}/${invoice.transactionDate.month}/${invoice.transactionDate.year}\n\n'
+      '$items\n\n'
+      'Subtotal: Rp ${invoice.subtotal}\n'
+      '${invoice.discountAmount > 0 ? 'Diskon: -Rp ${invoice.discountAmount}\n' : ''}'
+      '${invoice.additionalFee > 0 ? 'Biaya Tambahan: Rp ${invoice.additionalFee}\n' : ''}'
+      '*Total: Rp ${invoice.totalAmount}*\n\n'
+      'Terima kasih 🙏',
+    );
+    await Share.share('https://wa.me/?text=$text');
   }
 }

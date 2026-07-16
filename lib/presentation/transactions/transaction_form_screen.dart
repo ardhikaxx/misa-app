@@ -10,6 +10,7 @@ import '../../models/transaction_item_model.dart';
 import '../../providers/customer_provider.dart';
 import '../../providers/service_catalog_provider.dart';
 import '../../providers/transaction_provider.dart';
+import '../../routing/route_paths.dart';
 import '../../core/constants/app_text_styles.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
@@ -59,33 +60,53 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   style: AppTextStyles.heading3),
             ),
             Expanded(
-              child: ListView.builder(
-                controller: scrollController,
-                itemCount: customers.length,
-                itemBuilder: (context, index) {
-                  final customer = customers[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.primary,
-                      child: Text(
-                        customer.initials,
-                        style: const TextStyle(color: Colors.white),
+              child: customers.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.people_outline, size: 48, color: AppColors.textHint),
+                          const SizedBox(height: 12),
+                          const Text('Belum ada pelanggan', style: AppTextStyles.heading3),
+                          const SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              context.push(RoutePaths.customerForm);
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text(AppStrings.addCustomer),
+                          ),
+                        ],
                       ),
+                    )
+                  : ListView.builder(
+                      controller: scrollController,
+                      itemCount: customers.length,
+                      itemBuilder: (context, index) {
+                        final customer = customers[index];
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: AppColors.primary,
+                            child: Text(
+                              customer.initials,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          title: Text(customer.name),
+                          subtitle: Text(customer.phoneNumber),
+                          onTap: () {
+                            setState(() {
+                              _selectedCustomer = customer;
+                            });
+                            ref
+                                .read(transactionFormProvider.notifier)
+                                .selectCustomer(customer);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
                     ),
-                    title: Text(customer.name),
-                    subtitle: Text(customer.phoneNumber),
-                    onTap: () {
-                      setState(() {
-                        _selectedCustomer = customer;
-                      });
-                      ref
-                          .read(transactionFormProvider.notifier)
-                          .selectCustomer(customer);
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-              ),
             ),
           ],
         ),
@@ -111,23 +132,43 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   style: AppTextStyles.heading3),
             ),
             Expanded(
-              child: ListView.builder(
-                controller: scrollController,
-                itemCount: services.length,
-                itemBuilder: (context, index) {
-                  final service = services[index];
-                  return ListTile(
-                    title: Text(service.serviceName),
-                    subtitle: Text(
-                        '${service.category} - ${CurrencyFormatter.format(service.price)}'),
-                    trailing: const Icon(Icons.add_circle_outline),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showQuantityDialog(service);
-                    },
-                  );
-                },
-              ),
+              child: services.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.work_outline, size: 48, color: AppColors.textHint),
+                          const SizedBox(height: 12),
+                          const Text('Belum ada layanan', style: AppTextStyles.heading3),
+                          const SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              context.push(RoutePaths.serviceForm);
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text(AppStrings.addService),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: scrollController,
+                      itemCount: services.length,
+                      itemBuilder: (context, index) {
+                        final service = services[index];
+                        return ListTile(
+                          title: Text(service.serviceName),
+                          subtitle: Text(
+                              '${service.category} - ${CurrencyFormatter.format(service.price)}'),
+                          trailing: const Icon(Icons.add_circle_outline),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showQuantityDialog(service);
+                          },
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -414,7 +455,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   child: Column(
                     children: [
                       DropdownButtonFormField<String>(
-                        initialValue: formState.paymentMethod,
+                        value: formState.paymentMethod,
                         decoration: const InputDecoration(
                           labelText: AppStrings.paymentMethod,
                           prefixIcon: Icon(Icons.payment),
@@ -437,7 +478,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
-                        initialValue: formState.paymentStatus,
+                        value: formState.paymentStatus,
                         decoration: const InputDecoration(
                           labelText: AppStrings.paymentStatus,
                           prefixIcon: Icon(Icons.check_circle_outline),

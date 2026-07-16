@@ -325,11 +325,25 @@ class _ServicesTab extends ConsumerWidget {
 }
 
 // ─── CUSTOMERS TAB ─────────────────────────────────────────
-class _CustomersTab extends ConsumerWidget {
+class _CustomersTab extends ConsumerStatefulWidget {
   const _CustomersTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CustomersTab> createState() => _CustomersTabState();
+}
+
+class _CustomersTabState extends ConsumerState<_CustomersTab> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final customersAsync = ref.watch(customerListProvider);
 
     return Column(
@@ -337,9 +351,10 @@ class _CustomersTab extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(AppStrings.customers, style: AppTextStyles.heading1),
+              const Expanded(
+                child: Text(AppStrings.customers, style: AppTextStyles.heading1),
+              ),
               IconButton(
                 icon: const Icon(Icons.add_circle, color: AppColors.primary),
                 onPressed: () => context.push(RoutePaths.customerForm),
@@ -347,11 +362,42 @@ class _CustomersTab extends ConsumerWidget {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Cari pelanggan...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _searchQuery = '');
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
+          ),
+        ),
+        const SizedBox(height: 8),
         Expanded(
           child: customersAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, st) => Center(child: Text('Error: $e')),
             data: (customers) {
+              final filtered = _searchQuery.isEmpty
+                  ? customers
+                  : customers.where((c) =>
+                      c.name.toLowerCase().contains(_searchQuery) ||
+                      c.phoneNumber.contains(_searchQuery)).toList();
+
               if (customers.isEmpty) {
                 return Center(
                   child: Column(
@@ -372,11 +418,16 @@ class _CustomersTab extends ConsumerWidget {
                   ),
                 );
               }
+              if (filtered.isEmpty) {
+                return const Center(
+                  child: Text('Pelanggan tidak ditemukan', style: AppTextStyles.bodySmall),
+                );
+              }
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: customers.length,
+                itemCount: filtered.length,
                 itemBuilder: (context, index) {
-                  final customer = customers[index];
+                  final customer = filtered[index];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
@@ -413,11 +464,25 @@ class _CustomersTab extends ConsumerWidget {
 }
 
 // ─── TRANSACTIONS TAB ──────────────────────────────────────
-class _TransactionsTab extends ConsumerWidget {
+class _TransactionsTab extends ConsumerStatefulWidget {
   const _TransactionsTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_TransactionsTab> createState() => _TransactionsTabState();
+}
+
+class _TransactionsTabState extends ConsumerState<_TransactionsTab> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final transactionsAsync = ref.watch(transactionListProvider);
 
     return Column(
@@ -425,9 +490,10 @@ class _TransactionsTab extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(AppStrings.transactions, style: AppTextStyles.heading1),
+              const Expanded(
+                child: Text(AppStrings.transactions, style: AppTextStyles.heading1),
+              ),
               IconButton(
                 icon: const Icon(Icons.add_circle, color: AppColors.primary),
                 onPressed: () => context.push(RoutePaths.transactionForm),
@@ -435,11 +501,42 @@ class _TransactionsTab extends ConsumerWidget {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Cari transaksi...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _searchQuery = '');
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
+          ),
+        ),
+        const SizedBox(height: 8),
         Expanded(
           child: transactionsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, st) => Center(child: Text('Error: $e')),
             data: (transactions) {
+              final filtered = _searchQuery.isEmpty
+                  ? transactions
+                  : transactions.where((t) =>
+                      t.customerSnapshot.name.toLowerCase().contains(_searchQuery) ||
+                      t.invoiceNumber.toLowerCase().contains(_searchQuery)).toList();
+
               if (transactions.isEmpty) {
                 return Center(
                   child: Column(
@@ -460,11 +557,16 @@ class _TransactionsTab extends ConsumerWidget {
                   ),
                 );
               }
+              if (filtered.isEmpty) {
+                return const Center(
+                  child: Text('Transaksi tidak ditemukan', style: AppTextStyles.bodySmall),
+                );
+              }
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: transactions.length,
+                itemCount: filtered.length,
                 itemBuilder: (context, index) {
-                  final t = transactions[index];
+                  final t = filtered[index];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
@@ -479,7 +581,7 @@ class _TransactionsTab extends ConsumerWidget {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${t.invoiceNumber}', style: AppTextStyles.bodySmall),
+                          Text(t.invoiceNumber, style: AppTextStyles.bodySmall),
                           const SizedBox(height: 2),
                           Row(
                             children: [
@@ -629,11 +731,7 @@ class _MoreTab extends ConsumerWidget {
           icon: Icons.bar_chart,
           title: AppStrings.reports,
           subtitle: 'Laporan pendapatan',
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Fitur laporan akan segera tersedia')),
-            );
-          },
+          onTap: () => context.push(RoutePaths.reports),
         ),
         const Divider(height: 1),
         _MenuTile(
