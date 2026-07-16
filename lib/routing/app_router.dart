@@ -28,11 +28,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: RoutePaths.onboarding, builder: (_, _) => const BusinessSetupScreen()),
       GoRoute(path: RoutePaths.dashboard, builder: (_, _) => const DashboardScreen()),
       GoRoute(path: RoutePaths.serviceForm, builder: (_, _) => const ServiceFormScreen()),
+      GoRoute(path: RoutePaths.businessProfile, builder: (_, _) => const BusinessProfileScreen()),
+      GoRoute(path: RoutePaths.reports, builder: (_, _) => const ReportScreen()),
+      GoRoute(path: RoutePaths.customerForm, builder: (_, _) => const CustomerFormScreen()),
       GoRoute(
         path: RoutePaths.customerDetail,
         builder: (_, state) => CustomerDetailScreen(customerId: state.pathParameters['id']!),
       ),
-      GoRoute(path: RoutePaths.customerForm, builder: (_, _) => const CustomerFormScreen()),
       GoRoute(path: RoutePaths.transactionForm, builder: (_, _) => const TransactionFormScreen()),
       GoRoute(
         path: RoutePaths.transactionDetail,
@@ -42,8 +44,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePaths.invoicePreview,
         builder: (_, state) => InvoicePreviewScreen(transactionId: state.pathParameters['id']!),
       ),
-      GoRoute(path: RoutePaths.businessProfile, builder: (_, _) => const BusinessProfileScreen()),
-      GoRoute(path: RoutePaths.reports, builder: (_, _) => const ReportScreen()),
     ],
     redirect: (context, state) {
       final isLoggedIn = authState.valueOrNull != null;
