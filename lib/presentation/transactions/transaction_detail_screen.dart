@@ -26,10 +26,14 @@ class TransactionDetailScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),
         data: (transactions) {
-          final transaction = transactions.firstWhere(
-            (t) => t.transactionId == transactionId,
-            orElse: () => transactions.first,
-          );
+          if (transactions.isEmpty) {
+            return const Center(child: Text('Transaksi tidak ditemukan'));
+          }
+
+          try {
+            final transaction = transactions.firstWhere(
+              (t) => t.transactionId == transactionId,
+            );
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -220,6 +224,9 @@ class TransactionDetailScreen extends ConsumerWidget {
               ],
             ),
           );
+          } catch (_) {
+            return const Center(child: Text('Transaksi tidak ditemukan'));
+          }
         },
       ),
     );

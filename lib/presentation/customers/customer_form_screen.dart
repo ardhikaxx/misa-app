@@ -21,6 +21,7 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
   late TextEditingController _addressController;
   late TextEditingController _notesController;
   bool _isEdit = false;
+  bool _loaded = false;
 
   @override
   void initState() {
@@ -35,22 +36,30 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_loaded) return;
+
     final uri = GoRouterState.of(context).uri;
     final customerId = uri.queryParameters['customerId'];
-    if (customerId != null && !_isEdit) {
+
+    if (customerId != null) {
       _isEdit = true;
+      _loaded = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadCustomer(customerId);
       });
+    } else {
+      _loaded = true;
+      ref.read(customerFormProvider.notifier).reset();
     }
   }
 
   void _loadCustomer(String customerId) async {
     final customers = ref.read(customerListProvider).valueOrNull;
-    if (customers != null) {
+    if (customers == null || customers.isEmpty) return;
+
+    try {
       final customer = customers.firstWhere(
         (c) => c.customerId == customerId,
-        orElse: () => customers.first,
       );
       ref.read(customerFormProvider.notifier).loadCustomer(customer);
       setState(() {
@@ -60,6 +69,16 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
         _addressController.text = customer.address ?? '';
         _notesController.text = customer.notes ?? '';
       });
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pelanggan tidak ditemukan'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        context.pop();
+      }
     }
   }
 

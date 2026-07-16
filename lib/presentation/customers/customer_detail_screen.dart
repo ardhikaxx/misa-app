@@ -25,16 +25,17 @@ class CustomerDetailScreen extends ConsumerWidget {
             icon: const Icon(Icons.edit),
             onPressed: () {
               final customers = ref.read(customerListProvider).valueOrNull;
-              if (customers != null) {
+              if (customers == null || customers.isEmpty) return;
+
+              try {
                 final customer = customers.firstWhere(
                   (c) => c.customerId == customerId,
-                  orElse: () => customers.first,
                 );
                 ref.read(customerFormProvider.notifier).loadCustomer(customer);
                 context.push(
                   '${RoutePaths.customerForm}?customerId=$customerId',
                 );
-              }
+              } catch (_) {}
             },
           ),
         ],
@@ -43,106 +44,112 @@ class CustomerDetailScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),
         data: (customers) {
-          final customer = customers.firstWhere(
-            (c) => c.customerId == customerId,
-            orElse: () => customers.first,
-          );
+          if (customers.isEmpty) {
+            return const Center(child: Text('Pelanggan tidak ditemukan'));
+          }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: AppColors.primary,
-                          child: Text(
-                            customer.initials,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+          try {
+            final customer = customers.firstWhere(
+              (c) => c.customerId == customerId,
+            );
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundColor: AppColors.primary,
+                            child: Text(
+                              customer.initials,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          customer.name,
-                          style: AppTextStyles.heading2,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          customer.phoneNumber,
-                          style: AppTextStyles.body,
-                        ),
-                        if (customer.email != null && customer.email!.isNotEmpty)
+                          const SizedBox(height: 12),
                           Text(
-                            customer.email!,
-                            style: AppTextStyles.bodySmall,
+                            customer.name,
+                            style: AppTextStyles.heading2,
                           ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            customer.phoneNumber,
+                            style: AppTextStyles.body,
+                          ),
+                          if (customer.email != null && customer.email!.isNotEmpty)
+                            Text(
+                              customer.email!,
+                              style: AppTextStyles.bodySmall,
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Statistik',
-                            style: AppTextStyles.heading3),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _StatItem(
-                                label: 'Total Transaksi',
-                                value: '${customer.totalTransactions}',
-                                icon: Icons.receipt,
-                              ),
-                            ),
-                            Expanded(
-                              child: _StatItem(
-                                label: 'Total Belanja',
-                                value: CurrencyFormatter.format(customer.totalSpent),
-                                icon: Icons.account_balance_wallet,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (customer.address != null && customer.address!.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.location_on),
-                      title: const Text('Alamat'),
-                      subtitle: Text(customer.address!),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Statistik', style: AppTextStyles.heading3),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatItem(
+                                  label: 'Total Transaksi',
+                                  value: '${customer.totalTransactions}',
+                                  icon: Icons.receipt,
+                                ),
+                              ),
+                              Expanded(
+                                child: _StatItem(
+                                  label: 'Total Belanja',
+                                  value: CurrencyFormatter.format(customer.totalSpent),
+                                  icon: Icons.account_balance_wallet,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ],
-                if (customer.notes != null && customer.notes!.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.notes),
-                      title: const Text('Catatan'),
-                      subtitle: Text(customer.notes!),
+                  if (customer.address != null && customer.address!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.location_on),
+                        title: const Text('Alamat'),
+                        subtitle: Text(customer.address!),
+                      ),
                     ),
-                  ),
+                  ],
+                  if (customer.notes != null && customer.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.notes),
+                        title: const Text('Catatan'),
+                        subtitle: Text(customer.notes!),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
-            ),
-          );
+              ),
+            );
+          } catch (_) {
+            return const Center(child: Text('Pelanggan tidak ditemukan'));
+          }
         },
       ),
     );
@@ -174,10 +181,7 @@ class _StatItem extends StatelessWidget {
             color: AppColors.primary,
           ),
         ),
-        Text(
-          label,
-          style: AppTextStyles.caption,
-        ),
+        Text(label, style: AppTextStyles.caption),
       ],
     );
   }

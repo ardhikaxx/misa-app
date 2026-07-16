@@ -41,12 +41,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final isSetupComplete = ref.watch(isSetupCompleteProvider);
+    final setupStatus = ref.watch(businessSetupStatusProvider);
+    final isSetupComplete = setupStatus.valueOrNull ?? false;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_navigated || !mounted) return;
 
-      if (authState.isLoading) return;
+      if (authState.isLoading || setupStatus.isLoading) return;
 
       _navigated = true;
 

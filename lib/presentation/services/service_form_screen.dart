@@ -21,6 +21,7 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
   late TextEditingController _durationController;
   late TextEditingController _descriptionController;
   bool _isEdit = false;
+  bool _loaded = false;
 
   @override
   void initState() {
@@ -35,22 +36,30 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_loaded) return;
+
     final uri = GoRouterState.of(context).uri;
     final serviceId = uri.queryParameters['serviceId'];
-    if (serviceId != null && !_isEdit) {
+
+    if (serviceId != null) {
       _isEdit = true;
+      _loaded = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadService(serviceId);
       });
+    } else {
+      _loaded = true;
+      ref.read(serviceFormProvider.notifier).reset();
     }
   }
 
   void _loadService(String serviceId) async {
     final services = ref.read(serviceListProvider).valueOrNull;
-    if (services != null) {
+    if (services == null || services.isEmpty) return;
+
+    try {
       final service = services.firstWhere(
         (s) => s.serviceId == serviceId,
-        orElse: () => services.first,
       );
       ref.read(serviceFormProvider.notifier).loadService(service);
       setState(() {
@@ -60,6 +69,16 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
         _durationController.text = service.estimatedDuration;
         _descriptionController.text = service.description ?? '';
       });
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Layanan tidak ditemukan'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        context.pop();
+      }
     }
   }
 
