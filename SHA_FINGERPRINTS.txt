@@ -4,29 +4,26 @@ SHA Certificate Fingerprints - MISA App
 Package Name: com.example.misa_app
 Firebase Project: misa-6c18f
 
-Untuk mendapatkan SHA fingerprint, jalankan perintah berikut di terminal:
-
 --- DEBUG SHA-1 ---
-keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+SHA1:  F0:B7:68:3C:2C:2E:77:67:49:54:FD:BE:B0:B4:D8:8C:11:73:6E:16
+SHA256: 05:B8:A5:5A:BC:8B:77:3A:F4:EF:56:2E:DA:48:1F:CE:42:5E:79:D9:47:92:B3:AC:BC:61:20:D3:02:5A:E4:14
 
---- RELEASE SHA-1 ---
-keytool -list -v -keystore <path-to-your-release-keystore> -alias <alias>
-
---- Alternatif: Generate SHA-1 dari Gradle ---
-cd android
-./gradlew signingReport
+--- RELEASE SHA-1 (dhikadev.jks) ---
+SHA1:  43:2F:F8:62:74:EC:A1:59:6A:9B:E2:03:C7:40:39:5E:84:98:2C:80
+SHA256: 45:C3:A1:F8:6F:02:A6:5F:C7:41:FF:DC:70:D0:91:D6:D7:AD:97:45:10:68:AA:E3:12:4F:2B:06:07:0C:DB:84
 
 ============================================================
-Setelah mendapatkan SHA fingerprint, tambahkan di Firebase Console:
+Cara daftarkan di Firebase Console:
 1. Buka https://console.firebase.google.com/
 2. Pilih project misa-6c18f
 3. Klik gear icon (Project Settings)
-4. Scroll ke bawah, klik "Add fingerprint"
-5. Paste SHA-1 dan SHA-256
-6. Klik Save
-
-Catatan: 
-- Google Sign-In membutuhkan SHA-1 terdaftar di Firebase
-- Untuk development/debug, pastikan SHA-1 debug keystore sudah terdaftar
-- Untuk release, pastikan SHA-1 release keystore juga terdaftar
+4. Scroll ke bawah, klik Android app (com.example.misa_app)
+5. Klik "Add fingerprint"
+6. Paste SHA-1 dan SHA-256 (debug DAN release)
+7. Klik Save
+============================================================
+Catatan:
+- Debug SHA-1: untuk development/testing
+- Release SHA-1: untuk production build
+- Google Sign-In & Play App Signing membutuhkan SHA terdaftar
 ============================================================
